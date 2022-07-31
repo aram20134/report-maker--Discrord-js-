@@ -68,7 +68,7 @@ export default function DayPicker() {
       {error ? <Alert type="error" message={error} showIcon /> : ''}
       {result.length
       ? <div className='area-all'>
-          <p style={{textAlign:'center', fontSize:'20px'}}>Отчёт автоматически выравнивается, вносить дополнительные правки не нужно</p>
+          <p style={{textAlign:'center', fontSize:'20px'}}>Отчёт создаётся выравненным, вносить дополнительные правки не нужно</p>
           <textarea className='area' value={result} onChange={(e) => setResult(e.target.value)} />
           <Button size='large' style={{background: copy ? 'green' : '', color: copy ? 'white' : ''}} type='default' onClick={() => (navigator.clipboard.writeText(result), setCopy(!copy), setTimeout(() => {setCopy(false)}, 1500))}>{copy ? 'Скопировано!' : 'Скопировать отчёт'}</Button>
         </div>
