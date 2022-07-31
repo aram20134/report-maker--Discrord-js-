@@ -16,7 +16,6 @@ export default function DayPicker() {
   async function getReport(data) {
     setResult([])
     setParsedData([])
-    console.log(data[0].content)
     data.map((d) => {
       setParsedData(prev => [...prev,
         {name: d.content.slice(d.content.indexOf('Докладывает:') + 13, d.content.lastIndexOf('|') - 1), 
@@ -36,20 +35,21 @@ export default function DayPicker() {
     var allExcursions = 0;
     var isTrue = false;
     var isTrue2 = false;
+    var probel = parsedData.reduce((acc, cur) => acc.name.length > cur.name.length ? acc : cur)
     var report = 
       ` ${'```less'}\nОтчёт о проделанной работе тренеров с [${new Date(date[0]._d).toLocaleDateString()}] по [${new Date(date[1]._d).toLocaleDateString()}]\n\nОсновной состав:\n`
       parsedData.map((tr) => {
         tr.dateStart == new Date(date[0]._d).toLocaleDateString() ? isTrue = true : isTrue = false
         tr.dateEnd == new Date(date[1]._d).toLocaleDateString() ? isTrue2 = true : isTrue2 = false
-        if (isTrue && isTrue2) {
+        if (isTrue && isTrue2) {  
           allTrained += Number(tr.trained === "-" ? 0 : tr.trained)
           allCheks += Number(tr.checks === "-" ? 0 : tr.checks)
           allExcursions += Number(tr.excursions === "-" ? 0 : tr.excursions)
-          report += tr.name + " | " + tr.steamId + ` [обучил ${tr.trained == '-' ? '0' : tr.trained} | проверил ${tr.checks == '-' ? '0' : tr.checks} | экскурсий ${tr.excursions == '-' ? '0' : tr.excursions}]` + '\n'
+          tr.name = tr.name.slice(0, tr.name.indexOf('|')).length === 5 ? tr.name.slice(0, tr.name.indexOf('|')) + " " + tr.name.slice(tr.name.indexOf('|')) : tr.name
+          report += tr.name + " ".repeat(probel.name.length + 2 - tr.name.length) + "| " + tr.steamId + ` [обучил ${tr.trained == '-' ? '0 ' : tr.trained.length == 1 ? tr.trained + " " : tr.trained} | проверил ${tr.checks == '-' ? '0 ' : tr.checks.length == 1 ? tr.checks + " " : tr.checks} | экскурсий ${tr.excursions == '-' ? '0 ' : tr.excursions.length == 1 ? tr.excursions + " " : tr.excursions}]` + '\n'
         }
       })
       report += '\n' + `Всего тренерским составом базы Анаксес обучено [${allTrained}], проверено [${allCheks}], экскурсий [${allExcursions}].${'\n```'}`
-      console.log(allTrained)
       setResult(report)
       // axios.post('http://localhost:5000/send', {report:report})
   }, [parsedData])
@@ -60,15 +60,11 @@ export default function DayPicker() {
     setError('')
     setLoading(true)
     await axios.get('https://api.swrpngg.site/get').then(res => {return getReport(res.data)}).finally(() => setLoading(false))
-    // console.log(data[0].content)
-    
-    // console.log(getReport())
   }
 
   return (
     <Space style={{width:'100%'}} direction='vertical' size={12} className='DatePicker'>
       <RangePicker onChange={(date) => setDate(date)} />
-      {console.log(result)}
       <Button onClick={() => getMessages()} type='primary' loading={loading ? true : false}>Получить отчёт</Button>
       {error ? <Alert type="error" message={error} showIcon /> : ''}
       {result.length
