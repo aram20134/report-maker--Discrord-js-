@@ -12,6 +12,7 @@ export default function DayPicker() {
   const [date, setDate] = useState([])
   const [error, setError] = useState('')
   const [parsedData, setParsedData] = useState([])
+  const [copy, setCopy] = useState(false)
 
   async function getReport(data) {
     setResult([])
@@ -53,7 +54,6 @@ export default function DayPicker() {
       setResult(report)
       // axios.post('http://localhost:5000/send', {report:report})
   }, [parsedData])
-  
 
   async function getMessages() {
     if (date.length == 0) return setError('Заполните дату!')
@@ -61,16 +61,19 @@ export default function DayPicker() {
     setLoading(true)
     await axios.get('https://api.swrpngg.site/get').then(res => {return getReport(res.data)}).finally(() => setLoading(false))
   }
-
   return (
     <Space style={{width:'100%'}} direction='vertical' size={12} className='DatePicker'>
       <RangePicker onChange={(date) => setDate(date)} />
       <Button onClick={() => getMessages()} type='primary' loading={loading ? true : false}>Получить отчёт</Button>
       {error ? <Alert type="error" message={error} showIcon /> : ''}
       {result.length
-      ? <textarea className='area' value={result} onChange={(e) => setResult(e.target.value)} />
+      ? <div className='area'>
+          <textarea className='txtarea' value={result} onChange={(e) => setResult(e.target.value)} />
+          <Button size='large' style={{background: copy ? 'green' : '', color: copy ? 'white' : ''}} type='default' onClick={() => (navigator.clipboard.writeText(result), setCopy(!copy), setTimeout(() => {setCopy(false)}, 1500))}>{copy ? 'Скопировано!' : 'Скопировать отчёт'}</Button>
+        </div>
       : <div className='area' style={{background:'inherit'}}></div>
       }
     </Space>
   )
 }
+
