@@ -23,6 +23,7 @@ html, body {
     min-height: 100%;
     &__title {
         font-size: 48px;
+        text-align: center;
         font-weight: bold;
         color: white;
     }
@@ -32,9 +33,11 @@ html, body {
     flex-direction: column;
     align-items: center;
 }
-.txtarea {
+.area {
     color: white;
-    width: 700px;
+    // max-width: 700px;
+    max-width:65vw;
+    width: 100%;
     height: 500px;
     min-height: 500px;
     padding: 15px;
@@ -42,12 +45,13 @@ html, body {
     word-spacing: 10px;
     background-color: rgba(47,49,54,255)
 }
-.area {
+.area-all {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 15px;
+    width: 100vw;
 }
 .btn-copy {
     background-color: green;

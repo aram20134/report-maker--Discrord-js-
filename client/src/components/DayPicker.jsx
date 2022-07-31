@@ -67,8 +67,9 @@ export default function DayPicker() {
       <Button onClick={() => getMessages()} type='primary' loading={loading ? true : false}>Получить отчёт</Button>
       {error ? <Alert type="error" message={error} showIcon /> : ''}
       {result.length
-      ? <div className='area'>
-          <textarea className='txtarea' value={result} onChange={(e) => setResult(e.target.value)} />
+      ? <div className='area-all'>
+          <p style={{textAlign:'center', fontSize:'20px'}}>Отчёт автоматически выравниваеться, вносить дополнительные правки не нужно</p>
+          <textarea className='area' value={result} onChange={(e) => setResult(e.target.value)} />
           <Button size='large' style={{background: copy ? 'green' : '', color: copy ? 'white' : ''}} type='default' onClick={() => (navigator.clipboard.writeText(result), setCopy(!copy), setTimeout(() => {setCopy(false)}, 1500))}>{copy ? 'Скопировано!' : 'Скопировать отчёт'}</Button>
         </div>
       : <div className='area' style={{background:'inherit'}}></div>
