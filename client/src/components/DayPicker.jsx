@@ -36,7 +36,10 @@ export default function DayPicker() {
     var allExcursions = 0;
     var isTrue = false;
     var isTrue2 = false;
-    var probel = parsedData.reduce((acc, cur) => acc.name.length > cur.name.length ? acc : cur)
+    var probel = parsedData.reduce((acc, cur) => {
+      return (acc.name.length < 25) > (cur.name.length < 25) ? acc : cur
+    })
+    console.log(probel)
     var report = 
       ` ${'```less'}\nОтчёт о проделанной работе тренеров с [${new Date(date[0]._d).toLocaleDateString()}] по [${new Date(date[1]._d).toLocaleDateString()}]\n\nОсновной состав:\n`
       parsedData.map((tr) => {
