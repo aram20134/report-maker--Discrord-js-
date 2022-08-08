@@ -28,7 +28,7 @@ app.get('/get', async(req, res) => {
     arr = []
 
     const channel = client.channels.cache.get('799919297136033804')
-    await channel.messages.fetch({limit:15}).then(mes => {
+    await channel.messages.fetch({limit:200}).then(mes => {
         mes.map((a) => arr.push(a))
     })
     // arr.map((d) => {

@@ -1,7 +1,8 @@
 import '../styles/Main.scss'  
 import React from 'react'
-import {Space, DatePicker, Button, Alert} from 'antd'
+import {Space, DatePicker, Button, Alert, Input} from 'antd'
 import { useState, useEffect } from 'react';
+import Search from 'antd/lib/transfer/search';
 const axios = require('axios');
 const { RangePicker } = DatePicker;
 
@@ -13,13 +14,16 @@ export default function DayPicker() {
   const [error, setError] = useState('')
   const [parsedData, setParsedData] = useState([])
   const [copy, setCopy] = useState(false)
+  const [exceptions, setExceptions] = useState([])
+  const [except, setExcept] = useState('')
 
   async function getReport(data) {
     setResult([])
     setParsedData([])
     data.map((d) => {
       setParsedData(prev => [...prev,
-        {name: d.content.slice(d.content.indexOf('Докладывает:') + 13, d.content.lastIndexOf('|') - 1), 
+        {
+         name: d.content.slice(d.content.indexOf('Докладывает:') + 13, d.content.lastIndexOf('|') - 1), 
          dateStart: (d.content.slice(d.content.indexOf('В период с') + 'В период с'.length + 2, d.content.indexOf('] по ['))).replaceAll('/', '.'),
          dateEnd: (d.content.slice(d.content.indexOf('] по [') + '] по ['.length, d.content.indexOf(']:'))).replaceAll('/', '.'),
          checks: d.content.slice(d.content.indexOf('1.1 Проверка') + '1.1 Проверка'.length + 5, d.content.indexOf('1.2 Провалили') - 2),
@@ -31,21 +35,18 @@ export default function DayPicker() {
   }
   useEffect(() => {
     if (date.length == 0) return
+
     var allTrained = 0;
     var allCheks = 0;
     var allExcursions = 0;
-    var isTrue = false;
-    var isTrue2 = false;
-    var probel = parsedData.reduce((acc, cur) => {
-      return (acc.name.length < 25) > (cur.name.length < 25) ? acc : cur
-    })
-    console.log(probel)
+
+    var probel = parsedData.reduce((acc, cur) => (acc.name.length > cur.name.length) && (cur.name.length < 25 && acc.name.length < 25) ? acc : cur)
     var report = 
       ` ${'```less'}\nОтчёт о проделанной работе тренеров с [${new Date(date[0]._d).toLocaleDateString()}] по [${new Date(date[1]._d).toLocaleDateString()}]\n\nОсновной состав:\n`
       parsedData.map((tr) => {
-        tr.dateStart == new Date(date[0]._d).toLocaleDateString() ? isTrue = true : isTrue = false
-        tr.dateEnd == new Date(date[1]._d).toLocaleDateString() ? isTrue2 = true : isTrue2 = false
-        if (isTrue && isTrue2) {  
+        if (tr.dateStart === new Date(date[0]._d).toLocaleDateString() && tr.dateEnd === new Date(date[1]._d).toLocaleDateString()) {
+          if(exceptions.filter((ex) => tr.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return}
+
           allTrained += Number(tr.trained === "-" ? 0 : tr.trained)
           allCheks += Number(tr.checks === "-" ? 0 : tr.checks)
           allExcursions += Number(tr.excursions === "-" ? 0 : tr.excursions)
@@ -56,7 +57,7 @@ export default function DayPicker() {
       report += '\n' + `Всего тренерским составом базы Анаксес обучено [${allTrained}], проверено [${allCheks}], экскурсий [${allExcursions}].${'\n```'}`
       setResult(report)
       // axios.post('http://localhost:5000/send', {report:report})
-  }, [parsedData])
+  }, [parsedData, exceptions])
 
   async function getMessages() {
     if (date.length == 0) return setError('Заполните дату!')
@@ -64,6 +65,13 @@ export default function DayPicker() {
     setLoading(true)
     await axios.get('https://api.swrpngg.site/get').then(res => {return getReport(res.data)}).finally(() => setLoading(false))
   }
+
+  function addExcept(e) {
+    e.preventDefault()
+    setExceptions(prev => [...prev, except])
+    setExcept('')
+  }
+
   return (
     <Space style={{width:'100%'}} direction='vertical' size={12} className='DatePicker'>
       <RangePicker onChange={(date) => setDate(date)} />
@@ -72,6 +80,20 @@ export default function DayPicker() {
       {result.length
       ? <div className='area-all'>
           <p style={{textAlign:'center', fontSize:'20px'}}>Отчёт создаётся выравненным, вносить дополнительные правки не нужно</p>
+          <div className='exceptions'>
+            Добавить исключение
+              <form onSubmit={(e) => addExcept(e)}>
+                <Input placeholder='Номер или позывной' value={except} onChange={(e) => setExcept(e.target.value)} style={{MaxWidth:'230px', width:'100%'}} />
+              </form>
+          </div>
+          {exceptions.length > 0 && 
+          <div className='except-box'>
+          Исключения:
+            { 
+              exceptions.map((ex) => <div onClick={() => setExceptions(exceptions.filter((exc) => exc == ex ? false : true))} className='except' key={ex}>{ex}</div>)
+            }
+          </div> 
+          }
           <textarea className='area' value={result} onChange={(e) => setResult(e.target.value)} />
           <Button size='large' style={{background: copy ? 'green' : '', color: copy ? 'white' : ''}} type='default' onClick={() => (navigator.clipboard.writeText(result), setCopy(!copy), setTimeout(() => {setCopy(false)}, 1500))}>{copy ? 'Скопировано!' : 'Скопировать отчёт'}</Button>
         </div>

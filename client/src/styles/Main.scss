@@ -51,9 +51,34 @@ html, body {
     justify-content: center;
     align-items: center;
     gap: 15px;
-    width: 100vw;
+    width: 65vw;
 }
 .btn-copy {
     background-color: green;
     color: black;
+}
+.exceptions {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    width: 65vw;
+}
+.except-box {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+.except {
+    padding: 15px;
+    cursor: pointer;
+    background-color: rgba(47,49,54,255);
+    outline: 2px solid transparent;
+}
+.except:hover { 
+    outline: 2px solid darkred;
+    transition: all 0.3s linear;
 }
