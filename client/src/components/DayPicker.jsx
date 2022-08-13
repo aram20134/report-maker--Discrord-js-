@@ -32,7 +32,6 @@ export default function DayPicker() {
          steamId: d.content.slice(d.content.indexOf('steamid:') + 'steamid:'.length + 1, d.content.indexOf('steamid:') + '7656119910598994:'.length + 1 + 'steamid:'.length),
         }])
     })
-    console.log(parsedData)
   }
   useEffect(() => {
     if (date.length == 0) return
@@ -57,7 +56,6 @@ export default function DayPicker() {
       })
       report += '\n' + `Всего тренерским составом базы Анаксес обучено [${allTrained}], проверено [${allCheks}], экскурсий [${allExcursions}].${'\n```'}`
       setResult(report)
-      console.log(report)
       // axios.post('http://localhost:5000/send', {report:report})
   }, [parsedData, exceptions])
 
