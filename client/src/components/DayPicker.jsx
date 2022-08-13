@@ -28,10 +28,11 @@ export default function DayPicker() {
          dateEnd: (d.content.slice(d.content.indexOf('] по [') + '] по ['.length, d.content.indexOf(']:'))).replaceAll('/', '.'),
          checks: d.content.slice(d.content.indexOf('1.1 Проверка') + '1.1 Проверка'.length + 5, d.content.indexOf('1.2 Провалили') - 2),
          trained: d.content.slice(d.content.indexOf('1.4 Обучение') + '1.4 Обучение'.length + 5, d.content.indexOf('1.5 Экскурсия') - 2),
-         excursions: d.content.slice(d.content.indexOf('1.5 Экскурсия') + '1.5 Экскурсия'.length + 4, d.content.indexOf('#2') - 3),
+         excursions: d.content.slice(d.content.indexOf('1.5 Экскурсия') + '1.5 Экскурсия'.length + 4, d.content.indexOf('Проведено на текущем звании') - 6),
          steamId: d.content.slice(d.content.indexOf('steamid:') + 'steamid:'.length + 1, d.content.indexOf('steamid:') + '7656119910598994:'.length + 1 + 'steamid:'.length),
         }])
     })
+    console.log(parsedData)
   }
   useEffect(() => {
     if (date.length == 0) return
@@ -56,6 +57,7 @@ export default function DayPicker() {
       })
       report += '\n' + `Всего тренерским составом базы Анаксес обучено [${allTrained}], проверено [${allCheks}], экскурсий [${allExcursions}].${'\n```'}`
       setResult(report)
+      console.log(report)
       // axios.post('http://localhost:5000/send', {report:report})
   }, [parsedData, exceptions])
 
