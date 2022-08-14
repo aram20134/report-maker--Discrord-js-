@@ -16,6 +16,8 @@ export default function DayPicker() {
   const [copy, setCopy] = useState(false)
   const [exceptions, setExceptions] = useState([])
   const [except, setExcept] = useState('')
+  const [steamIdMatched, setSteamIdMatched] = useState([])
+
 
   async function getReport(data) {
     setResult([])
@@ -35,18 +37,24 @@ export default function DayPicker() {
   }
   useEffect(() => {
     if (date.length == 0) return
-
+    setSteamIdMatched([])
+    setError('')
     var allTrained = 0;
     var allCheks = 0;
     var allExcursions = 0;
-
+    parsedData.map((tr) => {
+      if (tr.dateStart === new Date(date[0]._d).toLocaleDateString() && tr.dateEnd === new Date(date[1]._d).toLocaleDateString()) {
+        if (exceptions.filter((ex) => tr.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return}
+        setSteamIdMatched(prev => [...prev, tr.steamId])
+      }
+    })
+    var steamIdMatchedUnique = [... new Set(steamIdMatched)]
     var probel = parsedData.reduce((acc, cur) => (acc.name.length > cur.name.length) && (cur.name.length < 25 && acc.name.length < 25) ? acc : cur)
     var report = 
       ` ${'```less'}\nОтчёт о проделанной работе тренеров с [${new Date(date[0]._d).toLocaleDateString()}] по [${new Date(date[1]._d).toLocaleDateString()}]\n\nОсновной состав:\n`
       parsedData.map((tr) => {
         if (tr.dateStart === new Date(date[0]._d).toLocaleDateString() && tr.dateEnd === new Date(date[1]._d).toLocaleDateString()) {
-          if(exceptions.filter((ex) => tr.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return}
-
+          if (exceptions.filter((ex) => tr.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return}
           allTrained += Number(tr.trained === "-" ? 0 : tr.trained)
           allCheks += Number(tr.checks === "-" ? 0 : tr.checks)
           allExcursions += Number(tr.excursions === "-" ? 0 : tr.excursions)
@@ -56,8 +64,12 @@ export default function DayPicker() {
       })
       report += '\n' + `Всего тренерским составом базы Анаксес обучено [${allTrained}], проверено [${allCheks}], экскурсий [${allExcursions}].${'\n```'}`
       setResult(report)
+      if (steamIdMatched.length !== steamIdMatchedUnique.length) {
+        setError(`НАЙДЕНО СОВПАДЕНИЕ STEAMID ${steamIdMatched.filter((el, i, arr) => arr.indexOf(el) !== i)}`)
+        
+      }
       // axios.post('http://localhost:5000/send', {report:report})
-  }, [parsedData, exceptions])
+  }, [parsedData, exceptions, result])
 
   async function getMessages() {
     if (date.length == 0) return setError('Заполните дату!')
