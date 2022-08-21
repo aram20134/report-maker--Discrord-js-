@@ -34,33 +34,38 @@ export default function DayPicker() {
          steamId: d.content.slice(d.content.indexOf('steamid:') + 'steamid:'.length + 1, d.content.indexOf('steamid:') + '7656119910598994:'.length + 1 + 'steamid:'.length),
         }])
     })
+    setParsedData(prev => prev.filter((tr) => tr.dateStart === new Date(date[0]._d).toLocaleDateString() ? true : false))
   }
   useEffect(() => {
     if (date.length == 0) return
+
     setSteamIdMatched([])
     setError('')
+
     var allTrained = 0;
     var allCheks = 0;
     var allExcursions = 0;
+
     parsedData.map((tr) => {
-      if (tr.dateStart === new Date(date[0]._d).toLocaleDateString() && tr.dateEnd === new Date(date[1]._d).toLocaleDateString()) {
-        if (exceptions.filter((ex) => tr.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return}
+      if (exceptions.filter((ex) => tr.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return}
         setSteamIdMatched(prev => [...prev, tr.steamId])
-      }
     })
     var steamIdMatchedUnique = [... new Set(steamIdMatched)]
-    var probel = parsedData.reduce((acc, cur) => (acc.name.length > cur.name.length) && (cur.name.length < 25 && acc.name.length < 25) ? acc : cur)
+
+    var probel = parsedData.reduce((acc, cur) => {
+      if (exceptions.filter((ex) => acc.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return cur}
+      return acc.name.length > cur.name.length && acc.name.length < 25 && cur.name.length < 25 ? acc : cur
+    })
+
     var report = 
       ` ${'```less'}\nОтчёт о проделанной работе тренеров с [${new Date(date[0]._d).toLocaleDateString()}] по [${new Date(date[1]._d).toLocaleDateString()}]\n\nОсновной состав:\n`
       parsedData.map((tr) => {
-        if (tr.dateStart === new Date(date[0]._d).toLocaleDateString() && tr.dateEnd === new Date(date[1]._d).toLocaleDateString()) {
           if (exceptions.filter((ex) => tr.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return}
-          allTrained += Number(tr.trained === "-" ? 0 : tr.trained)
-          allCheks += Number(tr.checks === "-" ? 0 : tr.checks)
-          allExcursions += Number(tr.excursions === "-" ? 0 : tr.excursions)
-          tr.name = tr.name.slice(0, tr.name.indexOf('|')).length === 5 ? tr.name.slice(0, tr.name.indexOf('|')) + " " + tr.name.slice(tr.name.indexOf('|')) : tr.name
-          report += tr.name + " ".repeat(probel.name.length + 2 - tr.name.length) + "| " + tr.steamId + ` [обучил ${tr.trained == '-' ? '0 ' : tr.trained.length == 1 ? tr.trained + " " : tr.trained} | проверил ${tr.checks == '-' ? '0 ' : tr.checks.length == 1 ? tr.checks + " " : tr.checks} | экскурсий ${tr.excursions == '-' ? '0 ' : tr.excursions.length == 1 ? tr.excursions + " " : tr.excursions}]` + '\n'
-        }
+            allTrained += Number(tr.trained === "-" ? 0 : tr.trained)
+            allCheks += Number(tr.checks === "-" ? 0 : tr.checks)
+            allExcursions += Number(tr.excursions === "-" ? 0 : tr.excursions)
+            tr.name = tr.name.slice(0, tr.name.indexOf('|')).length === 5 ? tr.name.slice(0, tr.name.indexOf('|')) + " " + tr.name.slice(tr.name.indexOf('|')) : tr.name
+            report += tr.name + " ".repeat(probel.name.length + 1 - tr.name.length) + "| " + tr.steamId + ` [обучил ${tr.trained == '-' ? '0 ' : tr.trained.length == 1 ? tr.trained + " " : tr.trained} | проверил ${tr.checks == '-' ? '0 ' : tr.checks.length == 1 ? tr.checks + " " : tr.checks} | экскурсий ${tr.excursions == '-' ? '0 ' : tr.excursions.length == 1 ? tr.excursions + " " : tr.excursions}]` + '\n'
       })
       report += '\n' + `Всего тренерским составом базы Анаксес обучено [${allTrained}], проверено [${allCheks}], экскурсий [${allExcursions}].${'\n```'}`
       setResult(report)
@@ -69,7 +74,7 @@ export default function DayPicker() {
         
       }
       // axios.post('http://localhost:5000/send', {report:report})
-  }, [parsedData, exceptions, result])
+  }, [exceptions, result, parsedData])
 
   async function getMessages() {
     if (date.length == 0) return setError('Заполните дату!')
