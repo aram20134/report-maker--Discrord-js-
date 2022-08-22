@@ -38,7 +38,7 @@ export default function DayPicker() {
   }
   useEffect(() => {
     if (date.length == 0) return
-
+    if (parsedData.length == 0) {return setError(`Отчёты не найдены в диапозоне от ${new Date(date[0]._d).toLocaleDateString()} до ${new Date(date[1]._d).toLocaleDateString()}`)}
     setSteamIdMatched([])
     setError('')
 
