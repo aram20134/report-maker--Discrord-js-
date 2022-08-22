@@ -54,7 +54,7 @@ export default function DayPicker() {
 
     var probel = parsedData.reduce((acc, cur) => {
       if (exceptions.filter((ex) => acc.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return cur}
-      return acc.name.length < cur.name.length && acc.name.length < 25 && cur.name.length < 25 ? cur : acc
+      return (acc.name.length > cur.name.length) && (acc.name.length < 25 && cur.name.length) < 25 ? acc : cur
     })
     var report = 
       ` ${'```less'}\nОтчёт о проделанной работе тренеров с [${new Date(date[0]._d).toLocaleDateString()}] по [${new Date(date[1]._d).toLocaleDateString()}]\n\nОсновной состав:\n`
