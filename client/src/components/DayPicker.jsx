@@ -30,11 +30,12 @@ export default function DayPicker() {
          dateEnd: (d.content.slice(d.content.indexOf('] по [') + '] по ['.length, d.content.indexOf(']:'))).replaceAll('/', '.'),
          checks: d.content.slice(d.content.indexOf('1.1 Проверка') + '1.1 Проверка'.length + 5, d.content.indexOf('1.2 Провалили') - 2),
          trained: d.content.slice(d.content.indexOf('1.4 Обучение') + '1.4 Обучение'.length + 5, d.content.indexOf('1.5 Экскурсия') - 2),
-         excursions: d.content.slice(d.content.indexOf('1.5 Экскурсия') + '1.5 Экскурсия'.length + 4, d.content.indexOf('Проведено на текущем звании') - 6),
+         excursions: d.content.slice(d.content.indexOf('1.5 Экскурсия') + '1.5 Экскурсия'.length + 4, d.content.indexOf('1.6 Испытание') - 2),
+         challenges: d.content.slice(d.content.indexOf('1.6 Испытание') + '1.6 Испытание'.length + 4, d.content.indexOf('Проведено на текущем звании') - 6),
          steamId: d.content.slice(d.content.indexOf('steamid:') + 'steamid:'.length + 1, d.content.indexOf('steamid:') + '7656119910598994:'.length + 1 + 'steamid:'.length),
         }])
     })
-    setParsedData(prev => prev.filter((tr) => tr.dateStart === new Date(date[0]._d).toLocaleDateString() ? true : false))
+    setParsedData(prev => prev.filter((tr) => tr.dateStart === new Date(date[0]._d).toLocaleDateString() ? true : false).filter((tr) => tr.challenges.length < 4 || tr.excursions.length < 4))
   }
   useEffect(() => {
     if (date.length == 0) return
@@ -45,12 +46,15 @@ export default function DayPicker() {
     var allTrained = 0;
     var allCheks = 0;
     var allExcursions = 0;
+    var allChallenges = 0;
 
     parsedData.map((tr) => {
       if (exceptions.filter((ex) => tr.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return}
         setSteamIdMatched(prev => [...prev, tr.steamId])
     })
-    var steamIdMatchedUnique = [... new Set(steamIdMatched)]
+    console.log(parsedData)
+
+    var steamIdMatchedUnique = [...new Set(steamIdMatched)]
 
     var probel = parsedData.reduce((acc, cur) => {
       if (exceptions.filter((ex) => acc.name.toLowerCase().includes(ex.toLowerCase()) ? true : false).length > 0) {return cur}
@@ -63,10 +67,13 @@ export default function DayPicker() {
             allTrained += Number(tr.trained === "-" ? 0 : tr.trained)
             allCheks += Number(tr.checks === "-" ? 0 : tr.checks)
             allExcursions += Number(tr.excursions === "-" ? 0 : tr.excursions)
+            allChallenges += Number(tr.challenges === "-" ? 0 : tr.challenges)
             tr.name = tr.name.slice(0, tr.name.indexOf('|')).length === 5 ? tr.name.slice(0, tr.name.indexOf('|')) + " " + tr.name.slice(tr.name.indexOf('|')) : tr.name
-            report += tr.name + " ".repeat(probel.name.length + 1 - tr.name.length) + "| " + tr.steamId + ` [обучил ${tr.trained == '-' ? '0 ' : tr.trained.length == 1 ? tr.trained + " " : tr.trained} | проверил ${tr.checks == '-' ? '0 ' : tr.checks.length == 1 ? tr.checks + " " : tr.checks} | экскурсий ${tr.excursions == '-' ? '0 ' : tr.excursions.length == 1 ? tr.excursions + " " : tr.excursions}]` + '\n'
+            report += 
+            tr.name + " ".repeat(probel.name.length + 1 - tr.name.length) + 
+            "| " + tr.steamId + ` [обучил ${tr.trained == '-' ? '0 ' : tr.trained.length == 1 ? tr.trained + " " : tr.trained} | проверил ${tr.checks == '-' ? '0 ' : tr.checks.length == 1 ? tr.checks + " " : tr.checks} | экскурсий ${tr.excursions == '-' ? '0 ' : tr.excursions.length == 1 ? tr.excursions + " " : tr.excursions} | испытаний ${tr.challenges == '-' ? '0 ' : tr.challenges.length == 1 ? tr.challenges + " " : tr.challenges}]` + '\n'
       })
-      report += '\n' + `Всего тренерским составом базы Анаксес обучено [${allTrained}], проверено [${allCheks}], экскурсий [${allExcursions}].${'\n```'}`
+      report += '\n' + `Всего тренерским составом базы Анаксес обучено [${allTrained}], проверено [${allCheks}], экскурсий [${allExcursions}], испытаний [${allChallenges}].${'\n```'}`
       setResult(report)
       if (steamIdMatched.length !== steamIdMatchedUnique.length) {
         setError(`НАЙДЕНО СОВПАДЕНИЕ STEAMID ${steamIdMatched.filter((el, i, arr) => arr.indexOf(el) !== i)}`)
@@ -79,7 +86,7 @@ export default function DayPicker() {
     if (date.length == 0) return setError('Заполните дату!')
     setError('')
     setLoading(true)
-    await axios.get('https://api.swrpngg.site/get').then(res => {return getReport(res.data)}).finally(() => setLoading(false))
+    await axios.get('https://api.swrpngg.online/get').then(res => {return getReport(res.data)}).finally(() => setLoading(false))
   }
 
   function addExcept(e) {
